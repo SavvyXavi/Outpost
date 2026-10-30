@@ -11,6 +11,9 @@
   "dependencies": {
     "@clerk/nextjs": "^7.9.2",
     "@clerk/ui": "^1.32.3",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "@supabase/supabase-js": "^2.118.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
     "lucide-react": "^1.64.0",
@@ -31,6 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "prisma": "^8.0.0-rc.28",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+    id          String  @id @default(cuid())
+    clerkId     String  @unique
+    email       String  @unique
+    name        String?
+    imageUrl    String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    //Workspaces the user created
+    createdWorkspace    Workspace[]
+    agentPrompt         AgentPrompt[]
+}
+
+enum WorkspaceStatus {
+    PLANNING
+    IN_PROGRESS
+    IN_REVIEW
+    DONE
+}
+
+model Workspace {
+    id          String  @id @default(cuid())
+    name        String
+    description String?
+    creatorId   String
+    creator     User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+    
+    //Clerk Organization id - membership/role source of truth (Org:admin, org:member)
+    //One org can own multiple workspacs (not unique); nullable due to solo user's personal workspace has no org
+    clerkOrgId  String?
+
+    status      WorkspaceStatus @default(PLANNING)
+    position    Float           @default(0)
+
+    shareToke   String?         @unique
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
+
+    //Every workspace is always one doc & one canvas, paired that are created alongside the workspace
+    doc             Doc?
+    canvas          Canvas?
+    agentPrompts    AgentPrompt[]
+
+    @@index([creatorId])
+    @@index([clerkOrgId])
+}
+
+model Doc {
+    id          String      @id @default(cuid())
+    workspaceId String      @unique
+    
+    //Blocknote block JSON - A readable copy for server-side features (agent, share, view)
+    content     Json?
+
+    //Yjs document state - the real-time collaboration source of truth
+    yjsState    Bytes?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Canvas {
+    id          String      @id @default(cuid())
+    workspaceId String      @unique
+
+    //tldraw shape/store snapshot
+    content     Json?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)    
+}
+
+model AgentPrompt {
+    id          String      @id @default(cuid())
+
+    //Who prompt counts against: workspace Clerk org id, or Clerk user
+    //Clerk prefix id: "org_" or "user_"
+    ownerId     String
+    userId      String
+    workspaceId String?
+    createdAt   DateTime    @default(now())
+    user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    workspace   Workspace?  @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+    @@index([ownerId, createdAt])
+}
