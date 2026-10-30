@@ -4,8 +4,8 @@ import "./globals.css";
 import { TooltipProvider } from "radix-ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import AppShell from "@/components/AppShell";
-// import { ClerkProvider } from "@clerk/nextjs";
-// import { dark } from "@clerk/ui/themes";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/ui/themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
